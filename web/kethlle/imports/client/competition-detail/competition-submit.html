@@ -1,0 +1,25 @@
+<h2>Submissions</h2>
+<table>
+    <tr>
+        <th>Id</th>
+        <th>Created</th>
+        <th>Scored</th>
+        <th>Score</th>
+        <th>Comment</th>
+    </tr>
+    <tr *ngFor="let sub of submissions">
+        <td>{{sub._id}}</td>
+        <td>{{sub.created}}</td>
+        <td>{{sub.scored || '-'}}</td>
+        <td>{{sub.score || '-'}}</td>
+        <td>{{sub.comment}}</td>
+    </tr>
+</table>
+<h3>Make Submission</h3>
+<form [formGroup]="submissionForm" (submit)="makeSubmission()">
+    <label>Data</label>
+    <textarea formControlName="data"></textarea>
+    <label>Comment</label>
+    <input formControlName="comment">
+    <button [disabled]="!submissionForm.valid">Submit</button>
+</form>

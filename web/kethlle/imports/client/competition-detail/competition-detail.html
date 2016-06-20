@@ -1,0 +1,11 @@
+<h1><span>Competition:</span><span>{{competition?.name}}</span></h1>
+<nav>
+    <ul>
+        <li><a routerLink=".">Info</a></li>
+        <li><a routerLink="leaderboard">Leaderboard</a></li>
+        <li *ngIf="participating()"><a routerLink="teams">Teams</a></li>
+        <li *ngIf="participating()"><a routerLink="submit">Submissions</a></li>
+        <li *ngIf="isAdmin()"><a routerLink="admin">Admin</a></li>
+    </ul>
+</nav>
+<router-outlet></router-outlet>

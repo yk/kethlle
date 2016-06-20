@@ -1,0 +1,29 @@
+<div *ngIf="userTeam()">
+    <h2>Your Team</h2>
+    <p>
+        <span>Name:</span>
+        <span>{{userTeam().name}}</span>
+    </p>
+    <h3>Members</h3>
+    <ul>
+        <li *ngFor="let member of userTeam().members">
+            {{member}}
+        </li>
+    </ul>
+    <button (click)="leaveTeam()">Leave Team</button>
+</div>
+<div *ngIf="!userTeam()">
+<h2>Teams</h2>
+<ul>
+    <li *ngFor="let team of teams">
+        <span>{{team.name}}</span>
+        <button (click)="joinTeam(team._id)">Join Team</button>
+    </li>
+</ul>
+</div>
+<h3>Create Team</h3>
+<form [formGroup]="newTeamForm" (submit)="addTeam()">
+    <label>Name</label>
+    <input formControlName="name">
+    <button [disabled]="!newTeamForm.valid">Create</button>
+</form>

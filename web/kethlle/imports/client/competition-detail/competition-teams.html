@@ -13,17 +13,18 @@
     <button (click)="leaveTeam()">Leave Team</button>
 </div>
 <div *ngIf="!userTeam()">
-<h2>Teams</h2>
-<ul>
-    <li *ngFor="let team of teams">
-        <span>{{team.name}}</span>
-        <button (click)="joinTeam(team._id)">Join Team</button>
-    </li>
-</ul>
+    <h2>Teams</h2>
+    <ul>
+        <li *ngFor="let team of detail.competition?.teams">
+            <span>{{team.name}}</span>
+            <span>{{team._id}}</span>
+            <button (click)="joinTeam(team._id)">Join Team</button>
+        </li>
+    </ul>
+    <h3>Create Team</h3>
+    <form [formGroup]="newTeamForm" (submit)="addTeam()">
+        <label>Name</label>
+        <input formControlName="name">
+        <button [disabled]="!newTeamForm.valid">Create</button>
+    </form>
 </div>
-<h3>Create Team</h3>
-<form [formGroup]="newTeamForm" (submit)="addTeam()">
-    <label>Name</label>
-    <input formControlName="name">
-    <button [disabled]="!newTeamForm.valid">Create</button>
-</form>

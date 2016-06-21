@@ -1,5 +1,5 @@
 import {Meteor} from 'meteor/meteor';
-import {Competitions, Teams, Submissions} from '../imports/collections/collections';
+import {Competitions, Submissions} from '../imports/collections/collections';
 import * as _u from 'lodash';
 
 function user(userId){
@@ -7,22 +7,14 @@ function user(userId){
 }
 
 Meteor.publish('competitions', function(){
-    return Competitions.find({}, {
-        transform: (c) => {
-            return c;
-        }
-    });
-});
-
-Meteor.publish('teams', function(competitionId: string){
-    return Teams.find({competitionId: competitionId});
+    return Competitions.find();
 });
 
 Meteor.publish('submissionsAdmin', function(competitionId: string){
     let competition = Competitions.findOne(competitionId) 
     if(!competition || !this.userId)
         return null;
-    if(!_u.includes(competition.admins, user(this.userId).username))
+    if(!_u.includes(competition.admins, this.userId))
         return null;
     return Submissions.find({competitionId: competitionId});
 });
@@ -30,10 +22,11 @@ Meteor.publish('submissionsAdmin', function(competitionId: string){
 Meteor.publish('submissions', function(competitionId: string){
     if(!this.userId)
         return null;
-    let teamId = Teams.findOne({competitionId: competitionId, members: user(this.userId).username});
+    let tcomp = Competitions.findOne({_id: competitionId, 'teams.members': this.userId}, {fields: {'teams.$': 1}});
+    let teamId = tcomp && tcomp.teams[0]._id || '';
     return Submissions.find({competitionId: competitionId,
                             $or: [
-                                {username: user(this.userId).username},
+                                {userId: this.userId},
                                 {$and: [
                                     {teamId: {$ne: ''}},
                                     {teamId: {$eq: teamId}},
@@ -41,8 +34,3 @@ Meteor.publish('submissions', function(competitionId: string){
                             ]});
 });
 
-Meteor.publish('userTeam', function(competitionId: string){
-    if(!this.userId)
-        return null;
-    return Teams.find({competitionId: competitionId, members: user(this.userId).username});
-});

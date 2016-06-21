@@ -6,4 +6,5 @@ interface Competition {
     participants: string[];
     solution: string;
     scoring: string;
+    teams: [Team];
 }

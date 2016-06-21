@@ -12,24 +12,18 @@ import * as _u from 'lodash';
     directives: [REACTIVE_FORM_DIRECTIVES],
 })
 export class CompetitionTeams extends MeteorComponent{
-    teams: Mongo.Cursor<Object>;
     newTeamForm = new FormGroup({
         name: new FormControl('', Validators.required),
     });
 
     constructor(private detail: CompetitionDetail){
         super();
-        this.subscribe('teams', this.detail.competitionId, () => {
-            this.teams = Teams.find({
-                competitionId: this.detail.competitionId
-            });
-        }, true);
     }
 
     userTeam(){
-        if(!Meteor.user() || !this.teams)
+        if(!Meteor.user() || !this.detail.competition)
             return null;
-        return _u.find(this.teams.map(_u.identity), (team) => _u.includes(team.members, Meteor.user().username));
+        return _u.find(this.detail.competition.teams, (team) => _u.includes(team.members, Meteor.userId()));
     }
 
     addTeam(){

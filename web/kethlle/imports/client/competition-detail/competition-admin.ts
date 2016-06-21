@@ -64,7 +64,7 @@ export class CompetitionAdmin extends MeteorComponent{
     }
 
     removeAdmin(admin){
-        if(admin == this.detail.user.username)
+        if(admin == this.detail.user._id)
             return;
         Competitions.update(this.detail.competitionId, {$pull: {admins: admin}});
     }

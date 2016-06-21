@@ -33,11 +33,11 @@ export class CompetitionDetail extends MeteorComponent{
     }
 
     participating(){
-        return this.competition && Meteor.user() && _u.includes(this.competition.participants, Meteor.user().username);
+        return this.competition && Meteor.user() && _u.includes(this.competition.participants, Meteor.userId());
     }
 
     isAdmin(){
-        return this.competition && Meteor.user() && _u.includes(this.competition.admins, Meteor.user().username);
+        return this.competition && Meteor.user() && _u.includes(this.competition.admins, Meteor.userId());
     }
 
 }

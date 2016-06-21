@@ -1,5 +1,6 @@
 import {Meteor} from 'meteor/meteor';
-import {Competitions, Teams, Submissions} from './collections/collections';
+import {Mongo} from 'meteor/mongo';
+import {Competitions, Submissions} from './collections/collections';
 import {check} from 'meteor/check';
 
 let loginCheck = () => {
@@ -9,13 +10,14 @@ let loginCheck = () => {
 };
 
 let participatingCheck = (competitionId) => {
-    if(Competitions.find({_id: competitionId, participants: Meteor.user().username}).count() == 0){
+    if(Competitions.find({_id: competitionId, participants: Meteor.userId()}).count() == 0){
         throw new Meteor.Error('403', 'Not participating in competition!');
     }
 };
 
 let userTeam = (competitionId) => {
-    return Teams.findOne({competitionId: competitionId, members: Meteor.user().username});
+    let comp =  Competitions.findOne({_id: competitionId, 'teams.members': Meteor.userId()}, {'teams.$': 1});
+    return comp && comp.teams[0] || null;
 };
 
 
@@ -26,21 +28,22 @@ Meteor.methods({
         Competitions.insert({
             name: name,
             description: '',
-            admins: [Meteor.user().username],
+            admins: [Meteor.userId()],
             participants: [],
             solution: '',
-            scoring: 'l2'
+            scoring: 'l2',
+            teams: []
         });
     },
     participateInCompetition: function(competitionId: string){
         check(competitionId, String);
         loginCheck();
-        Competitions.update(competitionId, {$addToSet: {participants: Meteor.user().username}});
+        Competitions.update(competitionId, {$addToSet: {participants: Meteor.userId()}});
     },
     unparticipateInCompetition: function(competitionId: string){
         check(competitionId, String);
         loginCheck();
-        Competitions.update(competitionId, {$pull: {participants: Meteor.user().username}});
+        Competitions.update(competitionId, {$pull: {participants: Meteor.userId()}});
     },
     createTeam: function(competitionId: string, name: string){
         check(competitionId, String);
@@ -48,11 +51,14 @@ Meteor.methods({
         loginCheck();
         participatingCheck(competitionId);
         if(!userTeam(competitionId)){
-            Teams.insert({
-                name: name,
-                competitionId: competitionId,
-                members: [Meteor.user().username],
-            });
+            Competitions.update(competitionId, {
+                $addToSet: {
+                    teams: {
+                        _id: new Mongo.ObjectID()._str,
+                        name: name,
+                        members: [Meteor.userId()],
+                    }
+                }});
         }
     },
     joinTeam: function(competitionId: string, teamId: string){
@@ -61,7 +67,7 @@ Meteor.methods({
         loginCheck();
         participatingCheck(competitionId);
         if(!userTeam(competitionId)){
-            Teams.update(teamId, {$addToSet: {members: Meteor.user().username}});
+            Competitions.update({_id: competitionId, 'teams._id': teamId}, {$addToSet: {'teams.$.members': Meteor.userId()}});
         }
     },
     leaveTeam: function(competitionId: string){
@@ -69,9 +75,15 @@ Meteor.methods({
         loginCheck();
         participatingCheck(competitionId);
         let team = userTeam(competitionId);
-        if(team){
-            Teams.update(team._id, {$pull: {members: Meteor.user().username}});
-            Teams.remove({members: {$size: 0}});
+        if(team && team._id){
+            let deleteTeam = team.members.length < 2;
+            console.log(team.members);
+            if(!deleteTeam){
+                Competitions.update({_id: competitionId, 'teams._id': team._id, 'teams.members': Meteor.userId()}, {$pull: {'teams.$.members': Meteor.userId()}});
+            }else{
+                Competitions.update({_id: competitionId}, {$pull: {teams: {_id: team._id}}});
+                Submissions.remove({teamId: team._id}); // maybe this is not needed
+            }
         }
     },
     makeSubmission: function(competitionId: string, data: string, comment: string){
@@ -81,13 +93,10 @@ Meteor.methods({
         loginCheck();
         participatingCheck(competitionId);
         let team = userTeam(competitionId);
-        let teamId = '';
-        if(team){
-            teamId = team._id;
-        }
+        let teamId = team && team._id || '';
         Submissions.insert({
             competitionId: competitionId,
-            username: Meteor.user().username,
+            userId: Meteor.userId(),
             teamId: teamId,
             data: data,
             comment: comment,
@@ -100,7 +109,7 @@ Meteor.methods({
         let sub = Submissions.findOne(subId);
         if(!sub)
             return;
-        let competition = Competitions.findOne({_id: sub.competitionId, admins: Meteor.user().username});
+        let competition = Competitions.findOne({_id: sub.competitionId, admins: Meteor.userId()});
         if(!competition)
             return;
         //score

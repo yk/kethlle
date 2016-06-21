@@ -1,6 +1,5 @@
 interface Team {
-    _id?: string;
-    competitionId: string;
+    _id: string;
     name: string;
     members: string[];
 }

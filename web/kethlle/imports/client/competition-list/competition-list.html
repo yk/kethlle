@@ -1,3 +1,4 @@
+<h3>Competitions</h3>
 <ul>
     <li *ngFor="let competition of competitions"><a [routerLink]="['/competition-detail', competition._id]">{{ competition.name }}</a></li>
 </ul>

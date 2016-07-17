@@ -1,0 +1,4 @@
+<p>hi</p>
+<input name="username" [(ngModel)]="username">
+<button (click)="loginDev(username)" [disabled]="!!user">Login</button>
+<button (click)="logout()" [disabled]="!user">Logout</button>

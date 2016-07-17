@@ -1,0 +1,15 @@
+md-sidenav-layout {
+    md-content .main-area {
+        margin-left: 2em;
+    }
+}
+
+.toc {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: white;
+    padding-left: 2em;
+}

@@ -1,0 +1,27 @@
+<h1>Team Formation</h1>
+<div *ngIf="!!user && !team">
+    <md-input placeholder="Team name" #newTeamName></md-input>
+    <md-input placeholder="Other team members (comma separated)" #newTeamMembers></md-input>
+    <button md-raised-button (click)="createTeam(newTeamName.value, newTeamMembers.value)" [disabled]="!newTeamName.value.trim()">Create New Team</button>
+</div>
+<div *ngIf="!!user && team">
+    <md-card>
+        <md-card-title>Your Team: {{team.name}}</md-card-title>
+        <md-card-content>
+            <div *ngIf="userIsConfirmed()">
+                <h3>You have already confirmed!</h3>
+            </div>
+            <div *ngIf="!userIsConfirmed()">
+                <h3>You have not confirmed yet!</h3>
+                <button md-button (click)="confirmTeam()">Confirm</button>
+                <button md-button (click)="declineTeam()">Decline</button>
+            </div>
+            <md-list>
+                <md-list-item *ngFor="let member of team.members">
+                    <h3 md-line>{{member.userId}}</h3>
+                    <p md-line>{{member.confirmed && 'confirmed' || 'unconfirmed'}}</p>
+                </md-list-item>
+            </md-list>
+        </md-card-content>
+    </md-card>
+</div>

@@ -9,16 +9,18 @@ import { bootstrap } from '@angular/platform-browser-dynamic';
 import {HTTP_PROVIDERS} from '@angular/http';
 import {disableDeprecatedForms, provideForms} from '@angular/forms';
 
-import { Home } from './home/home';
-import { Account } from './account/account';
-import { CompetitionDetail } from './competition-detail/competition-detail';
-import { CompetitionInfo } from './competition-detail/competition-info';
-import { CompetitionLeaderboard } from './competition-detail/competition-leaderboard';
-import { CompetitionSubmit } from './competition-detail/competition-submit';
-import { CompetitionAdmin } from './competition-detail/competition-admin';
-import { CompetitionTeams } from './competition-detail/competition-teams';
+import {Meteor} from 'meteor/meteor';
+import { MeteorComponent } from 'angular2-meteor';
+import { InjectUser } from 'angular2-meteor-accounts-ui';
 
-import { CompetitionList } from './competition-list/competition-list';
+import { Home } from './home/home';
+import { Login } from './login/login';
+import {TaskComponent} from './task/task';
+import {TeamsComponent} from './teams/teams';
+import {TeamGuard} from './guards/team.guard';
+
+import {TasksService} from './services/tasks';
+
 import '../methods.ts';
 
 import {HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
@@ -28,37 +30,51 @@ import {createOverlayContainer} from '@angular2-material/core/overlay/overlay-co
 import {MdGestureConfig} from '@angular2-material/core/gestures/MdGestureConfig';
 import {MdIconRegistry} from '@angular2-material/icon/icon-registry';
 import {MD_SIDENAV_DIRECTIVES} from '@angular2-material/sidenav';
+import {MD_LIST_DIRECTIVES} from '@angular2-material/list';
 import {MdToolbar} from '@angular2-material/toolbar';
 import {MdButton} from '@angular2-material/button';
 import {MdIcon} from '@angular2-material/icon';
+
+import template from './app.html';
  
 @Component({
       selector: 'app',
-        templateUrl: Constants.BASE + 'imports/client/app.html',
-        directives: [ROUTER_DIRECTIVES, MD_SIDENAV_DIRECTIVES, MdToolbar, MdButton, MdIcon],
+        //templateUrl: Constants.BASE + 'imports/client/app.html',
+        template,
+        directives: [ROUTER_DIRECTIVES, MD_SIDENAV_DIRECTIVES, MD_LIST_DIRECTIVES, MdToolbar, MdButton, MdIcon],
 })
-class KethlleApp {
+@InjectUser('user')
+class KethlleApp extends MeteorComponent {
+    public user: Meteor.User;
     public views: Object[] = [
         {
             name: 'Home',
             path: '/'
         },
+        {
+            name: 'Login',
+            path: '/login'
+        },
     ];
+
+    constructor(){
+        super();
+        this.subscribe('userData');
+    }
+
+    acceptToc(){
+        Meteor.call('acceptToc');
+    }
 }
  
 bootstrap(KethlleApp, [
-    provide(APP_BASE_HREF, {useValue: '/'}),
+    provide(APP_BASE_HREF, {useValue: Constants.BASE}),
+    TeamGuard, TasksService,
     provideRouter([
         { path: '', component: Home},
-        { path: 'account', component: Account},
-        { path: 'competition-list', component: CompetitionList},
-        { path: 'competition-detail/:id', component: CompetitionDetail, children: [
-            { path: '', component: CompetitionInfo },
-            { path: 'leaderboard', component: CompetitionLeaderboard },
-            { path: 'submit', component: CompetitionSubmit },
-            { path: 'admin', component: CompetitionAdmin },
-            { path: 'teams', component: CompetitionTeams },
-        ]},
+        { path: 'login', component: Login},
+        { path: 'tasks/:id', component: TaskComponent, canActivate: [TeamGuard]},
+        { path: 'tasks/:id/teams', component: TeamsComponent, canActivate: [TeamGuard]},
     ]),
     disableDeprecatedForms(),
     provideForms(),

@@ -1,9 +1,9 @@
 interface Submission {
     _id?: string;
-    competitionId: string;
+    taskId: string;
     teamId: string;
     userId: string;
-    comment: string;
+    comment?: string;
     data: string;
     score?: number;
     created: Date;

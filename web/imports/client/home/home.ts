@@ -1,23 +1,30 @@
 import 'reflect-metadata';
-import { Component } from '@angular/core';
-import { Accounts } from 'meteor/accounts-base';
-import { InjectUser } from 'angular2-meteor-accounts-ui';
-import { Meteor } from 'meteor/meteor';
+import { Component} from '@angular/core';
+import { ROUTER_DIRECTIVES} from '@angular/router';
 import { MeteorComponent } from 'angular2-meteor';
+import {Mongo} from 'meteor/mongo';
+import { InjectUser } from 'angular2-meteor-accounts-ui';
+import {MdCard} from '@angular2-material/card';
+import {MdButton} from '@angular2-material/button';
+
+import {TasksService} from '../services/tasks';
+
+import template from './home.html';
  
 @Component({
-    templateUrl: '/imports/client/home/home.html',
+    template,
+    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton ],
 })
 @InjectUser("user")
 export class Home extends MeteorComponent{
-    username: string = 'dev';
-    user: Meteor.User;
+    //public tasks: Mongo.Cursor<Task>;
+    public user: Meteor.User;
 
-    loginDev(username){
-        Accounts.callLoginMethod({methodArguments: [{apacheUser: username}]});
+    constructor(private tasksService: TasksService){
+        super();
+        //this.subscribe('tasks', () => {
+            //this.tasks = Tasks.find();
+        //}, true);
     }
 
-    logout(){
-        Accounts.logout();
-    }
 }

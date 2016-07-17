@@ -1,7 +1,8 @@
 import {Meteor} from 'meteor/meteor';
 import {Mongo} from 'meteor/mongo';
-import {Competitions, Submissions} from './collections/collections';
+import {Teams, IncompleteTeams, Submissions} from './collections/collections';
 import {check} from 'meteor/check';
+import * as _u from 'lodash';
 
 let loginCheck = () => {
     if(!Meteor.user()){
@@ -9,119 +10,100 @@ let loginCheck = () => {
     }
 };
 
-let participatingCheck = (competitionId) => {
-    if(Competitions.find({_id: competitionId, participants: Meteor.userId()}).count() == 0){
-        throw new Meteor.Error('403', 'Not participating in competition!');
+let userTeam = (taskId, userId) => Teams.findOne({taskId: taskId, 'members': userId});
+
+let userIncompleteTeam = (taskId, userId) => IncompleteTeams.findOne({taskId: taskId, 'members.userId': userId});
+
+let notInTeamOrITeamCheck = (taskId, userId) => {
+    let t = userTeam(taskId, userId);
+    let it = userIncompleteTeam(taskId, userId);
+    if(t || it){
+        throw new Meteor.Error('403', 'Already in a team');
     }
 };
 
-let userTeam = (competitionId) => {
-    let comp =  Competitions.findOne({_id: competitionId, 'teams.members': Meteor.userId()}, {'teams.$': 1});
-    return comp && comp.teams[0] || null;
-};
-
-
 Meteor.methods({
-    createCompetition: function(name: string){
-        check(name, String);
+    acceptToc: function(){
         loginCheck();
-        Competitions.insert({
+        let atoc = Meteor.user().acceptToc || new Date().getTime();
+        Meteor.users.update(Meteor.userId(), {$set: {acceptToc: atoc}});
+    },
+    createTeam: function(taskId: string, name: string, members: string){
+        check(taskId, String);
+        check(name, String);
+        check(members, String);
+        loginCheck();
+        let mlist = members.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        let uid = Meteor.userId();
+        if(mlist.indexOf(uid) < 0){
+            mlist.unshift(uid);
+        }
+        mlist = _u.uniq(mlist);
+        mlist.forEach(m => notInTeamOrITeamCheck(taskId, m));
+        let mObjList = mlist.map(m => {
+            return { userId: m, confirmed: false };
+        });
+        IncompleteTeams.insert({
+            taskId: taskId,
             name: name,
-            description: '',
-            admins: [Meteor.userId()],
-            participants: [],
-            solution: '',
-            scoring: 'l2',
-            teams: []
+            members: mObjList,
         });
     },
-    participateInCompetition: function(competitionId: string){
-        check(competitionId, String);
+    confirmTeam: function(taskId: string){
+        check(taskId, String);
         loginCheck();
-        Competitions.update(competitionId, {$addToSet: {participants: Meteor.userId()}});
-    },
-    unparticipateInCompetition: function(competitionId: string){
-        check(competitionId, String);
-        loginCheck();
-        Competitions.update(competitionId, {$pull: {participants: Meteor.userId()}});
-    },
-    createTeam: function(competitionId: string, name: string){
-        check(competitionId, String);
-        check(name, String);
-        loginCheck();
-        participatingCheck(competitionId);
-        if(!userTeam(competitionId)){
-            Competitions.update(competitionId, {
-                $addToSet: {
-                    teams: {
-                        _id: new Mongo.ObjectID()._str,
-                        name: name,
-                        members: [Meteor.userId()],
-                    }
-                }});
+        let team = userIncompleteTeam(taskId, Meteor.userId());
+        if(!team){
+            throw new Meteor.Error('403', 'Not in team');
         }
+        IncompleteTeams.update({_id: team._id, 'members.userId': Meteor.userId()}, {$set: {'members.$.confirmed': true}});
     },
-    joinTeam: function(competitionId: string, teamId: string){
-        check(competitionId, String);
-        check(teamId, String);
+    declineTeam: function(taskId: string){
+        check(taskId, String);
         loginCheck();
-        participatingCheck(competitionId);
-        if(!userTeam(competitionId)){
-            Competitions.update({_id: competitionId, 'teams._id': teamId}, {$addToSet: {'teams.$.members': Meteor.userId()}});
+        let team = userIncompleteTeam(taskId, Meteor.userId());
+        if(!team){
+            throw new Meteor.Error('403', 'Not in team');
         }
+        IncompleteTeams.remove(team._id);
     },
-    leaveTeam: function(competitionId: string){
-        check(competitionId, String);
+    finalizeTeam: function(taskId: string){
+        check(taskId, String);
         loginCheck();
-        participatingCheck(competitionId);
-        let team = userTeam(competitionId);
-        if(team && team._id){
-            let deleteTeam = team.members.length < 2;
-            console.log(team.members);
-            if(!deleteTeam){
-                Competitions.update({_id: competitionId, 'teams._id': team._id, 'teams.members': Meteor.userId()}, {$pull: {'teams.$.members': Meteor.userId()}});
-            }else{
-                Competitions.update({_id: competitionId}, {$pull: {teams: {_id: team._id}}});
-                Submissions.remove({teamId: team._id}); // maybe this is not needed
-            }
+        let team = userIncompleteTeam(taskId, Meteor.userId());
+        if(!team){
+            throw new Meteor.Error('403', 'Not in team');
         }
+        if(!_.every(team.members, m => m.confirmed)){
+            throw new Meteor.Error('403', 'Not all members confirmed');
+        }
+        Teams.insert({
+            taskId: team.taskId,
+            name: team.name,
+            members: team.members.map(m => m.userId),
+        });
+        IncompleteTeams.remove(team._id);
     },
-    makeSubmission: function(competitionId: string, data: string, comment: string){
-        check(competitionId, String);
-        check(data, String);
+    createSubmission: function(userSub: Submission){
+        loginCheck();
+        let taskId = userSub.taskId;
+        check(taskId, String);
+        let comment = userSub.comment || '';
         check(comment, String);
-        loginCheck();
-        participatingCheck(competitionId);
-        let team = userTeam(competitionId);
-        let teamId = team && team._id || '';
-        Submissions.insert({
-            competitionId: competitionId,
+        let team = userTeam(taskId, Meteor.userId());
+        if(!team){
+            throw new Meteor.Error('403', 'Not in team');
+        }
+        let sub = <Submission>{
+            taskId: taskId,
+            teamId: team._id,
             userId: Meteor.userId(),
-            teamId: teamId,
-            data: data,
             comment: comment,
             created: new Date(),
-        });
-    },
-    scoreSubmission: function(subId: string){
-        check(subId, String);
-        loginCheck();
-        let sub = Submissions.findOne(subId);
-        if(!sub)
-            return;
-        let competition = Competitions.findOne({_id: sub.competitionId, admins: Meteor.userId()});
-        if(!competition)
-            return;
-        //score
-        if(!sub.data || !competition.solution)
-            return;
-        let score = null;
-        if(competition.scoring == 'l2'){
-            score = parseFloat(sub.data) - parseFloat(competition.solution)
-            score = score * score
-        }
-        if(score == null)
-            return;
-        Submissions.update(sub._id, {$set: {score: score, scored: new Date()}});
+            data: 3,
+            score: Math.random(),
+            scored: new Date(),
+        };
+        Submissions.insert(sub);
     },
 });

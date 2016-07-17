@@ -1,6 +1,6 @@
-interface Team {
+interface IncompleteTeam {
     _id?: string;
     taskId: string;
     name: string;
-    members: string[];
+    members: Object[];
 }

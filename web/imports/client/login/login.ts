@@ -21,4 +21,14 @@ export class Login extends MeteorComponent{
     logout(){
         Accounts.logout();
     }
+
+    loginLDAP(username, password){
+        Meteor.loginWithLDAP(username, password, {
+            dn: 'cn=' + username + ',ou=users,ou=nethz,ou=id,ou=auth,o=ethz,c=ch',
+        }, (a,b,c) => {
+            console.log(a);
+            console.log(b);
+            console.log(c);
+        });
+    }
 }

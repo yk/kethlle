@@ -1,4 +1,6 @@
 <p>hi</p>
 <input name="username" [(ngModel)]="username">
+<input name="password" type="password" [(ngModel)]="password">
 <button (click)="loginDev(username)" [disabled]="!!user">Login</button>
+<button (click)="loginLDAP(username, password)" [disabled]="!!user">LDAP</button>
 <button (click)="logout()" [disabled]="!user">Logout</button>

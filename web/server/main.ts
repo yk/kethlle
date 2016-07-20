@@ -19,7 +19,7 @@ Meteor.startup(() => {
     Accounts.config({
         forbidClientAccountCreation: true
     });
-    console.log(LDAP_DEFAULTS);
+    //console.log(LDAP_DEFAULTS);
 });
 
 

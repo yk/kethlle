@@ -75,7 +75,6 @@ standard-minifier-js@1.0.8
 templating@1.1.13
 templating-tools@1.0.4
 tracker@1.0.14
-typ:accounts-ldap@1.0.1
 typ:ldapjs@0.7.3
 ui@1.0.11
 underscore@1.0.9
@@ -83,3 +82,4 @@ urigo:static-html-compiler@0.1.4
 url@1.0.10
 webapp@1.2.10
 webapp-hashing@1.0.9
+yk:accounts-ldap@1.1.0

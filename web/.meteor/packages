@@ -20,4 +20,5 @@ angular2-compilers
 accounts-base
 accounts-password
 check
+yk:ldapjs
 yk:accounts-ldap

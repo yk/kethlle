@@ -17,6 +17,7 @@ import { Home } from './home/home';
 import { Login } from './login/login';
 import {TaskComponent} from './task/task';
 import {TeamsComponent} from './teams/teams';
+import {AuthGuard} from './guards/auth.guard';
 import {TeamGuard} from './guards/team.guard';
 
 import {TasksService} from './services/tasks';
@@ -69,12 +70,12 @@ class KethlleApp extends MeteorComponent {
  
 bootstrap(KethlleApp, [
     provide(APP_BASE_HREF, {useValue: Constants.BASE}),
-    TeamGuard, TasksService,
+    AuthGuard, TeamGuard, TasksService,
     provideRouter([
-        { path: '', component: Home},
+        { path: '', component: Home, canActivate: [AuthGuard]},
         { path: 'login', component: Login},
-        { path: 'tasks/:id', component: TaskComponent, canActivate: [TeamGuard]},
-        { path: 'tasks/:id/teams', component: TeamsComponent, canActivate: [TeamGuard]},
+        { path: 'tasks/:id', component: TaskComponent, canActivate: [AuthGuard, TeamGuard]},
+        { path: 'tasks/:id/teams', component: TeamsComponent, canActivate: [AuthGuard, TeamGuard]},
     ]),
     disableDeprecatedForms(),
     provideForms(),

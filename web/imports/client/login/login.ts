@@ -1,5 +1,6 @@
 import 'reflect-metadata';
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
+import { Router} from '@angular/router';
 import { Accounts } from 'meteor/accounts-base';
 import { InjectUser } from 'angular2-meteor-accounts-ui';
 import { Meteor } from 'meteor/meteor';
@@ -11,8 +12,13 @@ import template from './login.html';
 })
 @InjectUser("user")
 export class Login extends MeteorComponent{
-    username: string = 'dev';
+    username: string = '';
+    password: string = '';
     user: Meteor.User;
+
+    constructor(private router: Router, private ngZone: NgZone){
+        super();
+    }
 
     loginDev(username){
         Accounts.callLoginMethod({methodArguments: [{apacheUser: username}]});
@@ -28,6 +34,10 @@ export class Login extends MeteorComponent{
         }, (err) => {
             if(err){
                 console.log(err);
+            }else{
+                this.ngZone.run(() => {
+                    this.router.navigate(['/']);
+                });
             }
         });
     }

@@ -13,12 +13,5 @@ export let GridFileSystem;
 if (Meteor.isServer) {
     let mongo = MongoInternals.NpmModules.mongodb.module; // eslint-disable-line no-undef
     GridFileSystem = Grid(Meteor.users.rawDatabase(), mongo);
-}else{
-    // mocking for client
-    GridFileSystem = {
-        writeFile: function(options, data, cb){
-            cb(null, {_id: '0'});
-        },
-    }
 }
 

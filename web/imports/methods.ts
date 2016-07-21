@@ -96,7 +96,11 @@ Meteor.methods({
         }
         let file;
         try{
-            file = Meteor.wrapAsync(GridFileSystem.writeFile, this)({filename: 'bla'}, userSub.data)
+            if(Meteor.isServer){
+                file = Meteor.wrapAsync(GridFileSystem.writeFile, GridFileSystem)({}, userSub.data)
+            }else{
+                file = {_id: '...'};
+            }
         }catch(err){
             console.log(err);
             throw new Meteor.Error('400', 'Could not write file');

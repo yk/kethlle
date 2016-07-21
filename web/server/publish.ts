@@ -17,3 +17,6 @@ Meteor.publish('incompleteteams', function(taskId){
 Meteor.publish('submissions', function(taskId){
     return Submissions.find({taskId: taskId, teamId: {$in: Teams.find({taskId: taskId, members: this.userId}).map(t => t._id)}});
 });
+
+//publish files maybe
+//https://github.com/VeliovGroup/Meteor-Files

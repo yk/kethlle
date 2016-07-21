@@ -1,6 +1,6 @@
 import {Meteor} from 'meteor/meteor';
 import {Mongo} from 'meteor/mongo';
-import {Teams, IncompleteTeams, Submissions} from './collections/collections';
+import {Teams, IncompleteTeams, Submissions, GridFileSystem} from './collections/collections';
 import {check} from 'meteor/check';
 import * as _u from 'lodash';
 
@@ -94,13 +94,20 @@ Meteor.methods({
         if(!team){
             throw new Meteor.Error('403', 'Not in team');
         }
+        let file;
+        try{
+            file = Meteor.wrapAsync(GridFileSystem.writeFile, this)({filename: 'bla'}, userSub.data)
+        }catch(err){
+            console.log(err);
+            throw new Meteor.Error('400', 'Could not write file');
+        }
         let sub = <Submission>{
             taskId: taskId,
             teamId: team._id,
             userId: Meteor.userId(),
             comment: comment,
             created: new Date(),
-            data: 3,
+            fileId: file._id,
             score: Math.random(),
             scored: new Date(),
         };

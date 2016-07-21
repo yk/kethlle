@@ -1,7 +1,24 @@
 import {Mongo} from 'meteor/mongo';
 import {Meteor} from 'meteor/meteor';
+import fs = require('fs');
+import Grid = require('gridfs');
 import * as _u from 'lodash';
 
-export let Teams = new Mongo.Collection<Team>('teams');
-export let IncompleteTeams = new Mongo.Collection<IncompleteTeam>('incompleteteams');
-export let Submissions = new Mongo.Collection<Submission>('submissions');
+
+export const Teams = new Mongo.Collection<Team>('teams');
+export const IncompleteTeams = new Mongo.Collection<IncompleteTeam>('incompleteteams');
+export const Submissions = new Mongo.Collection<Submission>('submissions');
+
+export let GridFileSystem;
+if (Meteor.isServer) {
+    let mongo = MongoInternals.NpmModules.mongodb.module; // eslint-disable-line no-undef
+    GridFileSystem = Grid(Meteor.users.rawDatabase(), mongo);
+}else{
+    // mocking for client
+    GridFileSystem = {
+        writeFile: function(options, data, cb){
+            cb(null, {_id: '0'});
+        },
+    }
+}
+

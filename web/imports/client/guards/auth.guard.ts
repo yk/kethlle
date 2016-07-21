@@ -15,6 +15,7 @@ export class AuthGuard implements CanActivate {
             Tracker.autorun(() => {
                 let user = Meteor.user();
                 if(!user){
+                    console.log('no user');
                     this.router.navigate(['/login'])
                 }else{
                     obs.next(true);

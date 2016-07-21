@@ -13,12 +13,13 @@ import {MdInput} from '@angular2-material/input';
 
 import {TasksService} from '../services/tasks';
 import {Teams, Submissions} from '../../collections/collections';
+import {FilePicker} from '../filepicker/filepicker';
 
 import template from './task.html';
  
 @Component({
     template,
-    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton, MdInput ],
+    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton, MdInput, FilePicker ],
 })
 @InjectUser("user")
 export class TaskComponent extends MeteorComponent{
@@ -38,8 +39,13 @@ export class TaskComponent extends MeteorComponent{
         }, true);
     }
 
-    createSubmission(comment){
-        Meteor.call('createSubmission', {taskId: this.task._id, comment: comment});
+    createSubmission(comment, file){
+        let r = new FileReader();
+        r.onload = evt => {
+            console.log(evt);
+            Meteor.call('createSubmission', {taskId: this.task._id, comment: comment, data: r.result});
+        };
+        r.readAsBinaryString(file);
     }
 
 }

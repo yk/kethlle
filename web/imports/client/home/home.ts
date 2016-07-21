@@ -13,7 +13,7 @@ import template from './home.html';
  
 @Component({
     template,
-    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton ],
+    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton],
 })
 @InjectUser("user")
 export class Home extends MeteorComponent{

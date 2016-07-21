@@ -4,7 +4,7 @@ interface Submission {
     teamId: string;
     userId: string;
     comment?: string;
-    data: string;
+    fileId: string;
     score?: number;
     created: Date;
     scored?: Date;

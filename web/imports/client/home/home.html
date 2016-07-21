@@ -2,7 +2,7 @@
 <md-card *ngFor="let task of tasksService.tasks">
     <md-card-title>{{task.name}}</md-card-title>
     <md-card-content>
-        <p>{{task.description}}</p>
+        <p>{{task.shortDescription}}</p>
     </md-card-content>
     <md-card-actions>
         <button md-button [routerLink]="['/tasks', task._id, 'teams']">View</button>

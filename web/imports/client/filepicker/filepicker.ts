@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Component, ElementRef, OnInit} from '@angular/core';
+import { Component, ElementRef} from '@angular/core';
 
 import template from './filepicker.html';
  
@@ -8,7 +8,7 @@ import template from './filepicker.html';
     template,
     directives: [ ],
 })
-export class FilePicker implements OnInit{
+export class FilePicker {
 
     public file: Any = undefined;
 

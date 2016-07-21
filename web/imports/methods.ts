@@ -104,12 +104,13 @@ Meteor.methods({
         let sub = <Submission>{
             taskId: taskId,
             teamId: team._id,
+            teamName: team.name,
             userId: Meteor.userId(),
             comment: comment,
-            created: new Date(),
+            createdAt: new Date(),
             fileId: file._id,
             score: Math.random(),
-            scored: new Date(),
+            scoredAt: new Date(),
         };
         Submissions.insert(sub);
     },

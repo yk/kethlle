@@ -14,12 +14,14 @@ import {MdInput} from '@angular2-material/input';
 import {TasksService} from '../services/tasks';
 import {Teams, Submissions} from '../../collections/collections';
 import {FilePicker} from '../filepicker/filepicker';
+import {MarkdownPipe} from '../pipes/markdown.pipe';
 
 import template from './task.html';
  
 @Component({
     template,
     directives: [ ROUTER_DIRECTIVES, MdCard, MdButton, MdInput, FilePicker ],
+    pipes: [MarkdownPipe],
 })
 @InjectUser("user")
 export class TaskComponent extends MeteorComponent{
@@ -27,6 +29,7 @@ export class TaskComponent extends MeteorComponent{
     public user: Meteor.User;
     public team: Team;
     public submissions: Mongo.Cursor<Submission>;
+    public ownSubmissions: Mongo.Cursor<Submission>;
 
     constructor(private tasksService: TasksService, private route: ActivatedRoute){
         super();
@@ -35,7 +38,8 @@ export class TaskComponent extends MeteorComponent{
             this.team = Teams.findOne({taskId: this.task._id});
         }, true);
         this.subscribe('submissions', this.task._id, () => {
-            this.submissions = Submissions.find({taskId: this.task._id});
+            this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: 1}});
+            this.ownSubmissions = Submissions.find({taskId: this.task._id, teamId: {$exists: true}}, {sort: {createdAt: 1}});
         }, true);
     }
 

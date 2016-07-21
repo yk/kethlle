@@ -15,7 +15,11 @@ Meteor.publish('incompleteteams', function(taskId){
 });
 
 Meteor.publish('submissions', function(taskId){
-    return Submissions.find({taskId: taskId, teamId: {$in: Teams.find({taskId: taskId, members: this.userId}).map(t => t._id)}});
+    return Submissions.find({taskId: taskId, $or: [{teamId: {$in: Teams.find({taskId: taskId, members: this.userId}).map(t => t._id)}}, {score: {$exists: true}}]});
+});
+
+Meteor.publish('leaderboard', function(taskId){
+    return Submissions.find({taskId: taskId, score: {$exists: true}}, {fields: {taskId: true, teamName: true, score: true, createdAt: true}});
 });
 
 //publish files maybe

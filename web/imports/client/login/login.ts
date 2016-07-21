@@ -37,7 +37,11 @@ export class Login extends MeteorComponent{
 
 
     loginDev(username){
-        Accounts.callLoginMethod({methodArguments: [{apacheUser: username}]});
+        Accounts.callLoginMethod({methodArguments: [{apacheUser: username}]}, () => {
+            this.ngZone.run(() => {
+                this.router.navigate(['/']);
+            });
+        });
     }
 
     loginLDAP(username, password){

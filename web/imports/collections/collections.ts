@@ -1,7 +1,7 @@
 import {Mongo} from 'meteor/mongo';
 import {Meteor} from 'meteor/meteor';
-import fs = require('fs');
-import Grid = require('gridfs');
+import * as fs from 'fs';
+import * as Grid from 'gridfs';
 import * as _u from 'lodash';
 
 

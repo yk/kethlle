@@ -1,6 +1,12 @@
 <h1>{{task.name}}</h1>
-<p>{{task.description}}</p>
+<p>{{task.shortDescription}}</p>
+<h2>Description</h2>
+<div [innerHtml]="(task.description | markdown)"></div>
 <h2>Your Team: {{team?.name}}</h2>
+<h3>Members:</h3>
+<p *ngIf="team">
+<span *ngFor="let member of team.members">{{member}}&nbsp;</span>
+</p>
 <h2>Make a submission</h2>
 <md-card>
     <md-input placeholder="Comment" #newSubmissionComment></md-input>
@@ -11,6 +17,6 @@
     <button md-button (click)="createSubmission(newSubmissionComment.value, fp.file)" [disabled]="!fp.file">Submit</button>
 </md-card>
 <h2>Submissions</h2>
-<md-card *ngFor="let sub of submissions">
+<md-card *ngFor="let sub of ownSubmissions">
     <md-card-title>{{sub._id}}</md-card-title>
 </md-card>

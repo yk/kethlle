@@ -1,6 +1,13 @@
-<p>hi</p>
-<input name="username" [(ngModel)]="username">
-<input name="password" type="password" [(ngModel)]="password">
-<button (click)="loginDev(username)" [disabled]="!!user">Login</button>
-<button (click)="loginLDAP(username, password)" [disabled]="!!user">LDAP</button>
-<button (click)="logout()" [disabled]="!user">Logout</button>
+<h1>Login</h1>
+<div *ngIf="!user">
+    <p>Log in using your nethz account!</p>
+    <form (submit)="login()">
+        <md-input placeholder="Username" name="username" [(ngModel)]="username"></md-input>
+        <md-input placeholder="Password" name="password" [(ngModel)]="password" type="password"></md-input>
+        <button md-button [disabled]="!username">Login</button>
+    </form>
+</div>
+<div *ngIf="!!user">
+    <p>Your are already logged in!</p>
+    <button md-button (click)="logout()">Logout</button>
+</div>

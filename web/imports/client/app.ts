@@ -58,13 +58,18 @@ class KethlleApp extends MeteorComponent {
         },
     ];
 
-    constructor(){
+    constructor(private router: Router){
         super();
         this.subscribe('userData');
     }
 
     acceptToc(){
         Meteor.call('acceptToc');
+    }
+
+    logout(){
+        Login.prototype.logout();
+        this.router.navigate(['/login']);
     }
 }
  

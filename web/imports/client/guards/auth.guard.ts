@@ -12,7 +12,7 @@ export class AuthGuard implements CanActivate {
 
     canActivate(route) {
         return Observable.create(obs => {
-            Tracker.autorun(() => {
+            Meteor.subscribe('userData', () => {
                 let user = Meteor.user();
                 if(!user){
                     console.log('no user');

@@ -11,6 +11,7 @@
             <md-icon>menu</md-icon>
         </button>
         kethlle
+        <div class="user-greeting" *ngIf="user"><span>Hi, {{user.username}}</span><button md-button (click)="logout()">Logout</button></div>
     </md-toolbar>
     <div class="main-area">
         <router-outlet></router-outlet>

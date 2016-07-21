@@ -4,6 +4,15 @@ md-sidenav-layout {
     }
 }
 
+md-toolbar {
+    .user-greeting {
+        margin-left: auto;
+        button {
+            margin-left: 1em;
+        }
+    }
+}
+
 .toc {
     position: absolute;
     top: 0;

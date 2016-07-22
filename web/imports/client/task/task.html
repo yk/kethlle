@@ -2,6 +2,19 @@
 <p>{{task.shortDescription}}</p>
 <h2>Description</h2>
 <div [innerHtml]="(task.description | markdown)"></div>
+<h2>Leaderboard</h2>
+<table>
+    <tr>
+        <th>Score</th>
+        <th>Team</th>
+        <th>Date</th>
+    </tr>
+    <tr *ngFor="let sub of submissions">
+        <td>{{sub.score}}</td>
+        <td>{{sub.teamName}}</td>
+        <td>{{sub.createdAt | date:"medium"}}</td>
+    </tr>
+</table>
 <h2>Your Team: {{team?.name}}</h2>
 <h3>Members:</h3>
 <p *ngIf="team">

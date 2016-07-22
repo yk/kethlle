@@ -45,7 +45,7 @@ export class TaskComponent extends MeteorComponent{
     }
 
     readSubmissions(){
-        this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: 1}});
+        this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: -1}});
         this.ownSubmissions = Submissions.find({taskId: this.task._id, teamId: {$exists: true}}, {sort: {createdAt: -1}});
     }
 

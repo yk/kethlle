@@ -17,12 +17,15 @@ import {Teams, Submissions} from '../../collections/collections';
 import {FilePicker} from '../filepicker/filepicker';
 import {MarkdownPipe} from '../pipes/markdown.pipe';
 
+import {PaginatePipe, PaginationControlsCmp, PaginationService} from 'ng2-pagination';
+
 import template from './task.html';
  
 @Component({
     template,
-    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton, MdInput, MdSpinner, FilePicker ],
-    pipes: [MarkdownPipe],
+    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton, MdInput, MdSpinner, FilePicker, PaginationControlsCmp ],
+    pipes: [MarkdownPipe, PaginatePipe],
+    providers: [PaginationService],
 })
 @InjectUser("user")
 export class TaskComponent extends MeteorComponent{
@@ -45,8 +48,9 @@ export class TaskComponent extends MeteorComponent{
     }
 
     readSubmissions(){
-        this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: -1}});
-        this.ownSubmissions = Submissions.find({taskId: this.task._id, teamId: {$exists: true}}, {sort: {createdAt: -1}});
+        // need fetching for pagination...
+        this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: -1}}).fetch();
+        this.ownSubmissions = Submissions.find({taskId: this.task._id, teamId: {$exists: true}}, {sort: {createdAt: -1}}).fetch();
     }
 
     createSubmission(fp){

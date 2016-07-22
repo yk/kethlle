@@ -20,6 +20,9 @@ md-toolbar {
     tr:nth-child(2n+1){
         background-color: lightgray;
     }
+    td, th {
+        padding: 0.35em;
+    }
 }
 
 #new-submission-form {

@@ -49,8 +49,8 @@ export class TaskComponent extends MeteorComponent{
 
     readSubmissions(){
         // need fetching for pagination...
-        this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: -1}}).fetch();
-        this.ownSubmissions = Submissions.find({taskId: this.task._id, teamId: {$exists: true}}, {sort: {createdAt: -1}}).fetch();
+        this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: -1}});
+        this.ownSubmissions = Submissions.find({taskId: this.task._id, teamId: {$exists: true}}, {sort: {createdAt: -1}});
     }
 
     createSubmission(fp){

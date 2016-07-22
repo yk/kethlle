@@ -10,6 +10,7 @@ import { InjectUser } from 'angular2-meteor-accounts-ui';
 import {MdCard} from '@angular2-material/card';
 import {MdButton} from '@angular2-material/button';
 import {MdInput} from '@angular2-material/input';
+import {MdSpinner} from '@angular2-material/progress-circle';
 
 import {TasksService} from '../services/tasks';
 import {Teams, Submissions} from '../../collections/collections';
@@ -20,7 +21,7 @@ import template from './task.html';
  
 @Component({
     template,
-    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton, MdInput, FilePicker ],
+    directives: [ ROUTER_DIRECTIVES, MdCard, MdButton, MdInput, MdSpinner, FilePicker ],
     pipes: [MarkdownPipe],
 })
 @InjectUser("user")
@@ -30,6 +31,8 @@ export class TaskComponent extends MeteorComponent{
     public team: Team;
     public submissions: Mongo.Cursor<Submission>;
     public ownSubmissions: Mongo.Cursor<Submission>;
+    private comment: string = '';
+    private submissionInProgress: boolean = false;
 
     constructor(private tasksService: TasksService, private route: ActivatedRoute){
         super();
@@ -37,17 +40,28 @@ export class TaskComponent extends MeteorComponent{
         this.subscribe('teams', this.task._id, () => {
             this.team = Teams.findOne({taskId: this.task._id});
         }, true);
-        this.subscribe('submissions', this.task._id, () => {
-            this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: 1}});
-            this.ownSubmissions = Submissions.find({taskId: this.task._id, teamId: {$exists: true}}, {sort: {createdAt: 1}});
-        }, true);
+        this.subscribe('submissions', this.task._id, () => this.readSubmissions(), true);
+        this.subscribe('leaderboard', this.task._id, () => this.readSubmissions(), true);
     }
 
-    createSubmission(comment, file){
+    readSubmissions(){
+        this.submissions = Submissions.find({taskId: this.task._id, score: {$exists: true}}, {sort: {score: 1}});
+        this.ownSubmissions = Submissions.find({taskId: this.task._id, teamId: {$exists: true}}, {sort: {createdAt: -1}});
+    }
+
+    createSubmission(fp){
         let r = new FileReader();
+        let file = fp.file;
+        let fn = file.name;
+        this.submissionInProgress = true;
+        r.onabort = evt => {this.submissionInProgress = false;};
+        r.onerror = evt => {this.submissionInProgress = false;};
         r.onload = evt => {
-            console.log(evt);
-            Meteor.call('createSubmission', {taskId: this.task._id, comment: comment, data: r.result});
+            Meteor.call('createSubmission', {taskId: this.task._id, filename: fn, comment: this.comment, data: r.result}, (err) => {
+                this.submissionInProgress = false;
+            });
+            this.comment = '';
+            fp.clear();
         };
         r.readAsBinaryString(file);
     }

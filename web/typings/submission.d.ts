@@ -6,6 +6,7 @@ interface Submission {
     userId: string;
     comment?: string;
     fileId: string;
+    filename: string;
     score?: number;
     error?: string;
     createdAt: Date;

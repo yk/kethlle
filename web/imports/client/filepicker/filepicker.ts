@@ -23,4 +23,8 @@ export class FilePicker {
         }
     }
 
+    clear(){
+        this.el.nativeElement.querySelector('input').value = '';
+    }
+
 }

@@ -8,15 +8,25 @@
 <span *ngFor="let member of team.members">{{member}}&nbsp;</span>
 </p>
 <h2>Make a submission</h2>
-<md-card>
-    <md-input placeholder="Comment" #newSubmissionComment></md-input>
+<md-card class="new-submission-form">
+    <div class="progress-indicator-overlay" *ngIf="submissionInProgress">
+        <md-spinner></md-spinner>
+    </div>
+    <md-input placeholder="Comment" [(ngModel)]="comment"></md-input>
     <label>
         <span>File</span>
         <file-picker #fp></file-picker>
     </label>
-    <button md-button (click)="createSubmission(newSubmissionComment.value, fp.file)" [disabled]="!fp.file">Submit</button>
+    <button md-button (click)="createSubmission(fp)" [disabled]="!fp.file">Submit</button>
 </md-card>
-<h2>Submissions</h2>
+<h2>Your Submissions</h2>
 <md-card *ngFor="let sub of ownSubmissions">
-    <md-card-title>{{sub._id}}</md-card-title>
+    <md-card-subtitle>{{sub.createdAt | date:"medium"}}</md-card-subtitle>
+    <md-card-title>{{sub.filename || '(unnamed)'}}</md-card-title>
+    <md-card-content>
+        <h4>Comment</h4>
+        <p>{{sub.comment || '-'}}</p>
+        <h4>Score</h4>
+        <p>{{sub.score || '-'}}</p>
+    </md-card-content>
 </md-card>

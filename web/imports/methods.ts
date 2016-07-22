@@ -90,6 +90,8 @@ Meteor.methods({
         check(taskId, String);
         let comment = userSub.comment || '';
         check(comment, String);
+        let filename = userSub.filename;
+        check(filename, String);
         let team = userTeam(taskId, Meteor.userId());
         if(!team){
             throw new Meteor.Error('403', 'Not in team');
@@ -97,7 +99,7 @@ Meteor.methods({
         let file;
         try{
             if(Meteor.isServer){
-                file = Meteor.wrapAsync(GridFileSystem.writeFile, GridFileSystem)({}, userSub.data)
+                file = Meteor.wrapAsync(GridFileSystem.writeFile, GridFileSystem)({filename: filename}, userSub.data)
             }else{
                 file = {_id: '...'};
             }
@@ -113,6 +115,7 @@ Meteor.methods({
             comment: comment,
             createdAt: new Date(),
             fileId: file._id,
+            filename: filename,
             score: Math.random(),
             scoredAt: new Date(),
         };

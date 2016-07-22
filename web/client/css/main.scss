@@ -13,7 +13,16 @@ md-toolbar {
     }
 }
 
-.new-submission-form {
+#leaderboard-table {
+    tr:first-child {
+        text-align: left;
+    }
+    tr:nth-child(2n+1){
+        background-color: lightgray;
+    }
+}
+
+#new-submission-form {
     position: relative;
     .progress-indicator-overlay {
         position: absolute;
